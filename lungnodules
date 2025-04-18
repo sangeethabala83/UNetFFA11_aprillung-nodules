@@ -1,0 +1,95 @@
+import tensorflow as tf
+import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+
+# Fractal-Fractional Integral Mask in TensorFlow (Keras-compatible)
+class FractalFractionalIntegralMaskLayer(tf.keras.layers.Layer):
+    def __init__(self, alpha=0.8, beta=0.5, kernel_size=3, **kwargs):
+        super(FractalFractionalIntegralMaskLayer, self).__init__(**kwargs)
+        self.alpha = alpha
+        self.beta = beta
+        self.kernel_size = kernel_size
+        self.center = self.kernel_size // 2
+
+    def build(self, input_shape):
+        # Generate the mask only once
+        self.mask = self.generate_mask()
+
+    def generate_mask(self):
+        mask = np.zeros((self.kernel_size, self.kernel_size), dtype=np.float32)
+        for i in range(self.kernel_size):
+            for j in range(self.kernel_size):
+                distance = np.sqrt((i - self.center) ** 2 + (j - self.center) ** 2)
+                mask[i, j] = (1 + distance ** self.alpha) ** (-self.beta)
+        mask /= np.sum(mask)
+        mask = tf.convert_to_tensor(mask, dtype=tf.float32)
+        mask = tf.expand_dims(tf.expand_dims(mask, -1), -1)  # Shape (k, k, 1, 1)
+        return mask
+
+    def call(self, inputs):
+        mask_tensor = tf.tile(self.mask, [1, 1, tf.shape(inputs)[-1], 1])
+        enhanced_feature_map = tf.nn.depthwise_conv2d(inputs, mask_tensor, strides=[1, 1, 1, 1], padding='SAME')
+        return enhanced_feature_map
+
+# Attention Block with Fractal-Fractional Derivatives
+def fractal_fractional_attention_block(g, x, filters, alpha=0.8, beta=0.5, kernel_size=3):
+    g_conv = tf.keras.layers.Conv2D(filters, (1, 1), activation='relu', padding='same')(g)
+    x_conv = tf.keras.layers.Conv2D(filters, (1, 1), activation='relu', padding='same')(x)
+    combined = tf.keras.layers.add([g_conv, x_conv])
+    combined = tf.keras.layers.Activation('relu')(combined)
+
+    fractal_mask_layer = FractalFractionalIntegralMaskLayer(alpha=alpha, beta=beta, kernel_size=kernel_size)
+    enhanced_combined = fractal_mask_layer(combined)
+
+    attention = tf.keras.layers.Conv2D(1, (1, 1), activation='sigmoid', padding='same')(enhanced_combined)
+    attention = tf.keras.layers.multiply([x, attention])
+    return attention
+
+# Nested Skip Connection Block (for U-Net)
+def nested_skip(input_tensor, filters):
+    conv = tf.keras.layers.Conv2D(filters, (3, 3), activation='relu', padding='same')(input_tensor)
+    conv = tf.keras.layers.Conv2D(filters, (3, 3), activation='relu', padding='same')(conv)
+    return conv
+
+# U-Net Model with Fractal-Fractional Attention
+def unet_plus_plus_with_fractal_attention(input_size=(256, 256, 1)):
+    inputs = tf.keras.layers.Input(input_size)
+
+    # Encoder with attention blocks
+    conv1 = nested_skip(inputs, 64)
+    attention1 = fractal_fractional_attention_block(conv1, conv1, 64)
+    pool1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2))(attention1)
+
+    conv2 = nested_skip(pool1, 128)
+    attention2 = fractal_fractional_attention_block(conv2, conv2, 128)
+    pool2 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2))(attention2)
+
+    conv3 = nested_skip(pool2, 256)
+    attention3 = fractal_fractional_attention_block(conv3, conv3, 256)
+    pool3 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2))(attention3)
+
+    # Bottleneck
+    conv4 = nested_skip(pool3, 512)
+
+    # Decoder with attention blocks
+    up5 = tf.keras.layers.Conv2DTranspose(256, 2, strides=(2, 2), padding='same')(conv4)
+    merge5 = tf.keras.layers.concatenate([up5, attention3], axis=3)
+    merge5 = fractal_fractional_attention_block(merge5, attention3, 256)
+    conv5 = nested_skip(merge5, 256)
+
+    up6 = tf.keras.layers.Conv2DTranspose(128, 2, strides=(2, 2), padding='same')(conv5)
+    merge6 = tf.keras.layers.concatenate([up6, attention2], axis=3)
+    merge6 = fractal_fractional_attention_block(merge6, attention2, 128)
+    conv6 = nested_skip(merge6, 128)
+
+    up7 = tf.keras.layers.Conv2DTranspose(64, 2, strides=(2, 2), padding='same')(conv6)
+    merge7 = tf.keras.layers.concatenate([up7, attention1], axis=3)
+    merge7 = fractal_fractional_attention_block(merge7, attention1, 64)
+    conv7 = nested_skip(merge7, 64)
+
+    # Output layer
+    output = tf.keras.layers.Conv2D(1, 1, activation='sigmoid')(conv7)
+
+    model = tf.keras.Model(inputs=inputs, outputs=output)
+    return model
