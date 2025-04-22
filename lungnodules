@@ -94,7 +94,7 @@ def unet_plus_plus_with_fractal_attention(input_size=(256, 256, 1)):
     model = tf.keras.Model(inputs=inputs, outputs=output)
     return model
 
-P Value graph
+P Value graph (FIGURE13)
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import ttest_1samp
@@ -140,5 +140,54 @@ plt.legend(fontsize=10)
 plt.ylim(0, max(p_values) + 0.02)
 
 # Show the plot
+plt.tight_layout()
+plt.show()
+
+COMPARATIVE ANALYSIS (FIGURE 12)
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Data
+methods = [
+    'ACX U-Net',
+    '3D UNet',
+    'HMSAM UNet',
+    'MUS-Net',
+    'ResNet 50',
+    'UNet-FFA'
+]
+
+dice = [0.98, 0.84, 0.98, 0.87, 0.96, 0.98]
+iou = [0.97, 0.74, 0.97, 0.78, 0.90, 0.97]
+
+x = np.arange(len(methods))  # the label locations
+width = 0.35  # the width of the bars
+
+# Plotting
+fig, ax = plt.subplots(figsize=(12, 6))
+bars1 = ax.bar(x - width/2, dice, width, label='Dice Coefficient', color='blue')
+bars2 = ax.bar(x + width/2, iou, width, label='IoU', color='lightgreen')
+
+# Labels and title
+ax.set_ylabel('Scores')
+#ax.set_title('Comparison of Dice Coefficient and IoU Across Methods')
+ax.set_xticks(x)
+ax.set_xticklabels(methods, rotation=15)
+ax.set_ylim(0, 1.1)
+ax.legend()
+
+# Add value labels above bars
+def add_labels(bars):
+    for bar in bars:
+        height = bar.get_height()
+        ax.annotate(f'{height:.2f}',
+                    xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0, 4),
+                    textcoords="offset points",
+                    ha='left', va='bottom')
+
+add_labels(bars1)
+add_labels(bars2)
+
 plt.tight_layout()
 plt.show()
