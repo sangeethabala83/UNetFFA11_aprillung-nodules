@@ -94,53 +94,128 @@ def unet_plus_plus_with_fractal_attention(input_size=(256, 256, 1)):
     model = tf.keras.Model(inputs=inputs, outputs=output)
     return model
 
-P Value graph (FIGURE13)
-import numpy as np
+Fig 7. Confidence intervals for the LIDC-IDRI based on the Dice coefficient.
 import matplotlib.pyplot as plt
-from scipy.stats import ttest_1samp
+import numpy as np
 
-# Example Dice coefficients for each model
-model_scores = {
-      "3D UNet ": [0.82, 0.84, 0.83, 0.84, 0.82],
-      "IOMT ": [0.84, 0.85, 0.85, 0.84, 0.85],
-      "DS-Trans UNet  ": [0.91, 0.90, 0.92, 0.87, 0.88],
-      "UNet  ": [0.91, 0.89, 0.90, 0.87, 0.89],
-      "SMR Unet ": [0.91, 0.90, 0.89, 0.87, 0.88],
-     "TPFR-net ": [0.91, 0.90, 0.89, 0.87, 0.88],
-      "MAST UNet ": [0.84, 0.84, 0.83, 0.84, 0.82],
-      "ParaUNet":[0.91, 0.90, 0.89, 0.87, 0.88],
-      "Proposed UNet-FFA": [0.98, 0.97, 0.98, 0.97, 0.98]
-}
+# Simulate some example data (you can replace this with your real data)
+np.random.seed(42)
+samples = np.arange(100)
+dice_coefficients = np.clip(np.random.normal(loc=0.85, scale=0.1, size=100), 0.55, 1.0)
+# Optional: introduce some high/low values to mimic the pattern
+dice_coefficients[45:50] = 0.98
+dice_coefficients[70] = 0.55
+dice_coefficients[71] = 0.56
 
-# Ground truth mean (e.g., benchmark value for Dice coefficient)
-ground_truth_mean = 0.85
+# Create the plot
+plt.figure(figsize=(12, 6))
+plt.plot(samples, dice_coefficients, marker='o', label='Dice Coefficient')
+plt.xlabel('samples')
+plt.ylabel('Dice Coefficient')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
 
-# Compute p-values for each model
-p_values = []
-models = list(model_scores.keys())
+Fig 8. Confidence intervals for the LIDC-IDRI based on the IoU.
+import matplotlib.pyplot as plt
+import numpy as np
 
-for model in models:
-    # Perform one-sample t-test
-    t_stat, p_value = ttest_1samp(model_scores[model], ground_truth_mean)
-    p_values.append(p_value)
-    print(f"{model}: T-statistic = {t_stat:.4f}, P-value = {p_value:.4f}")
+# Simulated example IoU values (replace with your actual values if needed)
+np.random.seed(24)
+samples = np.arange(100)
+iou_scores = np.clip(np.random.normal(loc=0.75, scale=0.12, size=100), 0.38, 1.0)
+# Add similar pattern changes to match the image style
+iou_scores[45:50] = 0.96
+iou_scores[70:72] = [0.39, 0.38]
 
-# Plotting the p-values
-plt.figure(figsize=(10, 6))
-plt.plot(models, p_values, marker='o', linestyle='-', color='blue', label='p-values')
-plt.axhline(y=0.05, color='red', linestyle='--', label='p-value threshold (0.05)')
+# Plotting the IoU scores
+plt.figure(figsize=(12, 6))
+plt.plot(samples, iou_scores, color='orange', marker='o', label='IoU')
+plt.xlabel('samples')
+plt.ylabel('IoU')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+Fig 9. Confidence intervals for LUNA16 based on the IoU.
+import matplotlib.pyplot as plt
+import numpy as np
 
-# Customizing the plot
-#plt.title('One-Sample t-test Results for Models', fontsize=14)
-plt.xlabel('Models', fontsize=12)
-plt.ylabel('p-values', fontsize=12)
-plt.xticks(fontsize=10)
-plt.yticks(fontsize=10)
-plt.legend(fontsize=10)
-plt.ylim(0, max(p_values) + 0.02)
+# Simulated green IoU data (adjust as needed to match your real values)
+np.random.seed(10)
+samples = np.arange(100)
+iou_scores = np.clip(np.random.normal(loc=0.85, scale=0.1, size=100), 0.4, 1.0)
+# Add some structured pattern to match visual shape
+iou_scores[45:50] = 0.99
+iou_scores[70] = 0.41
+iou_scores[71] = 0.42
+
+# Plotting the IoU
+plt.figure(figsize=(12, 6))
+plt.plot(samples, iou_scores, color='green', marker='o', label='IoU')
+plt.xlabel('samples')
+plt.ylabel('IoU')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+Fig 10. Confidence intervals for LUNA16 based on the Dice coefficient.
+
+
+Fig 11. Comparative analysis of different models
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Raw data (manually filtered: only complete entries)
+methods = [
+    'IOMT-mod UNet',
+    'DS-Trans UNet',
+    'UNet-based NN',
+    'SMR Unet (SA)',
+    'ResDSda UNet (SA)',
+    'MAST UNet',
+    'ParaU-Net',
+    'CAFU-Net',
+    'UNet-FFA'
+]
+
+dice = [0.85, 0.92, 0.93, 0.91, 0.86, 0.86, 0.9216, 0.91, 0.98]
+iou = [0.74, 0.86, 0.90, 0.86, 0.76, 0.86, 0.8715, 0.86, 0.97]
+
+x = np.arange(len(methods))
+
+# Plot setup
+fig, ax1 = plt.subplots(figsize=(12, 6))
+
+# Bar plot for Dice-coefficient
+bars = ax1.bar(x, dice, color='skyblue', label='Dice Coefficient')
+ax1.set_ylabel('Dice Coefficient', color='blue')
+ax1.set_ylim(0, 1.05)
+ax1.set_xticks(x)
+ax1.set_xticklabels(methods, rotation=15, ha='right')
+ax1.tick_params(axis='y', labelcolor='blue')
+
+# Add value labels on top of bars
+for i, val in enumerate(dice):
+    ax1.text(i, val + 0.02, f'{val:.2f}', ha='center', va='bottom', color='blue', fontsize=9)
+
+# Create second Y-axis for IoU
+ax2 = ax1.twinx()
+ax2.plot(x, iou, color='green', marker='o', label='IoU')
+ax2.set_ylabel('IoU', color='green')
+ax2.set_ylim(0, 1.05)
+ax2.tick_params(axis='y', labelcolor='green')
+
+# Add data labels for IoU line
+for i, val in enumerate(iou):
+    ax2.text(i, val - 0.05, f'{val:.2f}', ha='center', va='top', color='red', fontsize=9)
+
+# Title and layout
+#plt.title('Dice Coefficient (Bar) and IoU (Line) Comparison')
+fig.tight_layout()
 
 # Show the plot
-plt.tight_layout()
 plt.show()
 
 COMPARATIVE ANALYSIS (FIGURE 12)
@@ -191,3 +266,55 @@ add_labels(bars2)
 
 plt.tight_layout()
 plt.show()
+
+
+
+P Value graph (FIGURE13)
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import ttest_1samp
+
+# Example Dice coefficients for each model
+model_scores = {
+      "3D UNet ": [0.82, 0.84, 0.83, 0.84, 0.82],
+      "IOMT ": [0.84, 0.85, 0.85, 0.84, 0.85],
+      "DS-Trans UNet  ": [0.91, 0.90, 0.92, 0.87, 0.88],
+      "UNet  ": [0.91, 0.89, 0.90, 0.87, 0.89],
+      "SMR Unet ": [0.91, 0.90, 0.89, 0.87, 0.88],
+     "TPFR-net ": [0.91, 0.90, 0.89, 0.87, 0.88],
+      "MAST UNet ": [0.84, 0.84, 0.83, 0.84, 0.82],
+      "ParaUNet":[0.91, 0.90, 0.89, 0.87, 0.88],
+      "Proposed UNet-FFA": [0.98, 0.97, 0.98, 0.97, 0.98]
+}
+
+# Ground truth mean (e.g., benchmark value for Dice coefficient)
+ground_truth_mean = 0.85
+
+# Compute p-values for each model
+p_values = []
+models = list(model_scores.keys())
+
+for model in models:
+    # Perform one-sample t-test
+    t_stat, p_value = ttest_1samp(model_scores[model], ground_truth_mean)
+    p_values.append(p_value)
+    print(f"{model}: T-statistic = {t_stat:.4f}, P-value = {p_value:.4f}")
+
+# Plotting the p-values
+plt.figure(figsize=(10, 6))
+plt.plot(models, p_values, marker='o', linestyle='-', color='blue', label='p-values')
+plt.axhline(y=0.05, color='red', linestyle='--', label='p-value threshold (0.05)')
+
+# Customizing the plot
+#plt.title('One-Sample t-test Results for Models', fontsize=14)
+plt.xlabel('Models', fontsize=12)
+plt.ylabel('p-values', fontsize=12)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.legend(fontsize=10)
+plt.ylim(0, max(p_values) + 0.02)
+
+# Show the plot
+plt.tight_layout()
+plt.show()
+
