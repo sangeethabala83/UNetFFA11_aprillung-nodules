@@ -94,6 +94,7 @@ def unet_plus_plus_with_fractal_attention(input_size=(256, 256, 1)):
     model = tf.keras.Model(inputs=inputs, outputs=output)
     return model
 
+
 Fig 7. Confidence intervals for the LIDC-IDRI based on the Dice coefficient.
 import matplotlib.pyplot as plt
 import numpy as np
@@ -117,6 +118,7 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
+
 Fig 8. Confidence intervals for the LIDC-IDRI based on the IoU.
 import matplotlib.pyplot as plt
 import numpy as np
@@ -138,6 +140,8 @@ plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+
+
 Fig 9. Confidence intervals for LUNA16 based on the IoU.
 import matplotlib.pyplot as plt
 import numpy as np
@@ -160,7 +164,29 @@ plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+
+
 Fig 10. Confidence intervals for LUNA16 based on the Dice coefficient.
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Sample Dice Coefficient values for 100 samples (example data)
+# Replace this with your actual data
+dice_scores = np.random.uniform(0.6, 1.0, size=100)
+# Optional: simulate some realistic fluctuations
+dice_scores[70:80] = np.random.uniform(0.6, 0.8, size=10)  # dip in performance
+
+samples = np.arange(1, 101)
+
+plt.figure(figsize=(12, 6))
+plt.plot(samples, dice_scores, marker='o', label='Dice Coefficient')
+plt.xlabel('samples')
+plt.ylabel('Dice Coefficient')
+plt.title('Dice Coefficient across Samples')
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()
 
 
 Fig 11. Comparative analysis of different models
