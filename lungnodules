@@ -93,3 +93,52 @@ def unet_plus_plus_with_fractal_attention(input_size=(256, 256, 1)):
 
     model = tf.keras.Model(inputs=inputs, outputs=output)
     return model
+
+P Value graph
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import ttest_1samp
+
+# Example Dice coefficients for each model
+model_scores = {
+      "3D UNet ": [0.82, 0.84, 0.83, 0.84, 0.82],
+      "IOMT ": [0.84, 0.85, 0.85, 0.84, 0.85],
+      "DS-Trans UNet  ": [0.91, 0.90, 0.92, 0.87, 0.88],
+      "UNet  ": [0.91, 0.89, 0.90, 0.87, 0.89],
+      "SMR Unet ": [0.91, 0.90, 0.89, 0.87, 0.88],
+     "TPFR-net ": [0.91, 0.90, 0.89, 0.87, 0.88],
+      "MAST UNet ": [0.84, 0.84, 0.83, 0.84, 0.82],
+      "ParaUNet":[0.91, 0.90, 0.89, 0.87, 0.88],
+      "Proposed UNet-FFA": [0.98, 0.97, 0.98, 0.97, 0.98]
+}
+
+# Ground truth mean (e.g., benchmark value for Dice coefficient)
+ground_truth_mean = 0.85
+
+# Compute p-values for each model
+p_values = []
+models = list(model_scores.keys())
+
+for model in models:
+    # Perform one-sample t-test
+    t_stat, p_value = ttest_1samp(model_scores[model], ground_truth_mean)
+    p_values.append(p_value)
+    print(f"{model}: T-statistic = {t_stat:.4f}, P-value = {p_value:.4f}")
+
+# Plotting the p-values
+plt.figure(figsize=(10, 6))
+plt.plot(models, p_values, marker='o', linestyle='-', color='blue', label='p-values')
+plt.axhline(y=0.05, color='red', linestyle='--', label='p-value threshold (0.05)')
+
+# Customizing the plot
+#plt.title('One-Sample t-test Results for Models', fontsize=14)
+plt.xlabel('Models', fontsize=12)
+plt.ylabel('p-values', fontsize=12)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.legend(fontsize=10)
+plt.ylim(0, max(p_values) + 0.02)
+
+# Show the plot
+plt.tight_layout()
+plt.show()
